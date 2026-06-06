@@ -1,0 +1,66 @@
+/* මුළු Window එකේම Background එක */
+QMainWindow {
+    background-color: #090D16; /* Deepest Midnight Blue */
+}
+
+/* ප්‍රධාන මාතෘකාව */
+QLabel#MainTitle {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: 800;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+/* Hardware තොරතුරු පෙන්වන ලස්සන Premium Cards */
+QFrame#Card {
+    background-color: #131B2E; /* Slate Dark */
+    border-radius: 16px;
+    border: 1px solid #1E293B;
+}
+
+/* Mouse එක Card එක උඩට ගියාම වෙනස් වන හැටි (Hover Effect) */
+QFrame#Card:hover {
+    background-color: #1E2942;
+    border: 1px solid #38BDF8; /* Sky Blue Outline */
+}
+
+/* Cards ඇතුළේ තියෙන Text */
+QLabel#CardTitle {
+    color: #64748B; /* Muted Slate */
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+QLabel#CardValue {
+    color: #38BDF8; /* Sky Blue */
+    font-size: 32px;
+    font-weight: 800;
+    font-family: 'Consolas', monospace; /* Coding font එකක් */
+}
+
+/* Status පණිවිඩ */
+QLabel#StatusActive {
+    color: #34D399; /* Emerald Green */
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 0px;
+}
+
+/* 🔋 Progress Bar එක ලස්සන කිරීම */
+QProgressBar {
+    border: none;
+    background-color: #1E293B;
+    height: 8px;
+    border-radius: 4px;
+    text-align: center;
+    color: transparent; /* Text එක හංගන්න */
+}
+
+QProgressBar::chunk {
+    background-color: qlineargradition(x1:0, y1:0, x2:1, y2:0, stop:0 #06B6D4, stop:1 #3B82F6); /* Cyan to Blue Gradient */
+    border-radius: 4px;
+}
