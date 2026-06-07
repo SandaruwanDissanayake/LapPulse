@@ -61,13 +61,9 @@ Fork the repository.
 4. **Open a Pull Request (PR) against the main branch.
 
 💡 Ideas for Future Roadmap (Good First Issues):
-Add CPU Temperature (Thermal) tracking.
+   - **Add CPU Temperature (Thermal) tracking.
 
-Create a tray icon so the app runs in the background.
+   - **Create a tray icon so the app runs in the background.
 
-Build a settings window to customize the maintenance reminder interval.
+   - **Build a settings window to customize the maintenance reminder interval.
 
-📄 License
-This project is open-source and licensed under the MIT License. Feel free to use, modify, and distribute it.
-
-Developed with ❤️ for the student developer community.
