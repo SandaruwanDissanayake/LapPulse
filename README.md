@@ -21,7 +21,7 @@ Make sure you have Python installed on your system.
 ### Installation
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/YOUR_USERNAME/LapPulse.git](https://github.com/YOUR_USERNAME/LapPulse.git)
+   git clone https://github.com/SandaruwanDissanayake/LapPulse.git
    cd LapPulse
 
 2. **Create and activate a virtual environment:
