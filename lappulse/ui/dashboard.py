@@ -1,6 +1,93 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QVBoxLayout, QFrame, QProgressBar
+import json
+from PyQt6.QtWidgets import QMainWindow, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QFrame, QProgressBar, QPushButton, QDialog, QSpinBox, QComboBox
 from PyQt6.QtCore import QTimer, Qt
 from lappulse.core.hardware import HardwareMonitor
+
+
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.db_path = "lappulse_data.json"
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle("Settings")
+        self.setFixedSize(320, 220)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(15)
+
+        # Title Label
+        lbl = QLabel("Set Maintenance Interval:")
+        lbl.setObjectName("CardTitle")
+        layout.addWidget(lbl)
+
+        # Input Layout (Dropdown + SpinBox)
+        input_layout = QHBoxLayout()
+
+        # 🔄 Dropdown 
+        self.unit_combo = QComboBox()
+        self.unit_combo.addItems(["Days", "Seconds"])
+        
+        # Input Number Box
+        self.interval_input = QSpinBox()
+        self.interval_input.setRange(1, 3600)
+        
+        input_layout.addWidget(self.interval_input)
+        input_layout.addWidget(self.unit_combo)
+        layout.addLayout(input_layout)
+
+       
+        with open(self.db_path, "r") as f:
+            data = json.load(f)
+        
+      
+        saved_seconds = data.get("maintenance_interval_seconds", 30)
+         
+        if saved_seconds >= 86400: #  86400 seconds per day 
+            self.interval_input.setValue(int(saved_seconds / 86400))
+            self.unit_combo.setCurrentText("Days")
+        else:
+            self.interval_input.setValue(saved_seconds)
+            self.unit_combo.setCurrentText("Seconds")
+
+        # Buttons (Save & Cancel)
+        btn_layout = QHBoxLayout()
+        
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.setObjectName("CancelButton")
+        cancel_btn.clicked.connect(self.reject)
+        
+        save_btn = QPushButton("Save Settings")
+        save_btn.clicked.connect(self.save_settings)
+        
+        btn_layout.addWidget(cancel_btn)
+        btn_layout.addWidget(save_btn)
+        layout.addLayout(btn_layout)
+
+    def save_settings(self):
+        value = self.interval_input.value()
+        unit = self.unit_combo.currentText()
+        
+        
+        if unit == "Days":
+            final_seconds = value * 24 * 60 * 60
+        else:
+            final_seconds = value 
+
+        with open(self.db_path, "r") as f:
+            data = json.load(f)
+        
+        
+        data["maintenance_interval_seconds"] = final_seconds
+        
+        with open(self.db_path, "w") as f:
+            json.dump(data, f)
+            
+        self.accept()
+
+
 
 class DashboardWindow(QMainWindow):
     def __init__(self):
@@ -14,7 +101,7 @@ class DashboardWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("LapPulse v1.0 Pro")
-        self.setFixedSize(400, 550) 
+        self.setFixedSize(400, 580) 
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -22,16 +109,25 @@ class DashboardWindow(QMainWindow):
         main_layout.setContentsMargins(25, 25, 25, 25)
         main_layout.setSpacing(18)
 
-        # 1. App Title
+        # 1. Top Header
+        header_layout = QHBoxLayout()
         title_label = QLabel("⚡ LapPulse Pro")
         title_label.setObjectName("MainTitle")
-        main_layout.addWidget(title_label, alignment=Qt.AlignmentFlag.AlignLeft)
+        
+        settings_btn = QPushButton("⚙️")
+        settings_btn.setFixedSize(35, 35)
+        settings_btn.setStyleSheet("font-size: 16px; padding: 0px;")
+        settings_btn.clicked.connect(self.open_settings)
+        
+        header_layout.addWidget(title_label)
+        header_layout.addSpacing(10)
+        header_layout.addWidget(settings_btn, alignment=Qt.AlignmentFlag.AlignRight)
+        main_layout.addLayout(header_layout)
 
         # 2. Battery Card
         self.battery_card = QFrame()
         self.battery_card.setObjectName("Card")
         bat_layout = QVBoxLayout(self.battery_card)
-        # bat_layout.setMargins(QProgressBar().contentsMargins())
         bat_layout.setContentsMargins(15, 15, 15, 15)
         
         bat_title = QLabel("Battery Status")
@@ -39,7 +135,6 @@ class DashboardWindow(QMainWindow):
         self.bat_value = QLabel("--%")
         self.bat_value.setObjectName("CardValue")
         
-        # 🔋 Battery Progress Bar
         self.bat_bar = QProgressBar()
         self.bat_bar.setValue(0)
         
@@ -72,7 +167,6 @@ class DashboardWindow(QMainWindow):
         self.cpu_value = QLabel("--%")
         self.cpu_value.setObjectName("CardValue")
         
-        # 📈 CPU Progress Bar
         self.cpu_bar = QProgressBar()
         self.cpu_bar.setValue(0)
         
@@ -81,12 +175,16 @@ class DashboardWindow(QMainWindow):
         cpu_layout.addWidget(self.cpu_bar)
         main_layout.addWidget(self.cpu_card)
 
+    def open_settings(self):
+        dialog = SettingsDialog(self)
+        dialog.exec()
+
     def update_dashboard(self):
         metrics = self.monitor.get_system_metrics()
         
-        # UI update 
         self.bat_value.setText(f"{metrics['battery_percent']}%")
         self.bat_bar.setValue(metrics['battery_percent'])
+        
         self.cpu_value.setText(f"{metrics['cpu_usage']}%")
         self.cpu_bar.setValue(int(metrics['cpu_usage']))
         
@@ -94,7 +192,6 @@ class DashboardWindow(QMainWindow):
             self.char_value.setText("⚡ PLUGGED IN (Direct AC Power)")
             self.char_value.setStyleSheet("color: #34D399;")
             
-            # 🚨 Smart Notification Alert Trigger
             if metrics['trigger_discharge_alert']:
                 from plyer import notification
                 notification.notify(
