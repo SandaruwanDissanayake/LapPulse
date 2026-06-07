@@ -101,7 +101,7 @@ class DashboardWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("LapPulse v1.0 Pro")
-        self.setFixedSize(400, 580) 
+        self.setFixedSize(400, 650) 
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -175,15 +175,46 @@ class DashboardWindow(QMainWindow):
         cpu_layout.addWidget(self.cpu_bar)
         main_layout.addWidget(self.cpu_card)
 
+#5 memory optimization card
+
+        self.ram_card = QFrame()
+        self.ram_card.setObjectName("Card")
+        ram_layout = QVBoxLayout(self.ram_card)
+        ram_layout.setContentsMargins(15, 15, 15, 15)
+
+        ram_title = QLabel("Memory Optimization")
+        ram_title.setObjectName("CardTitle")
+
+        self.btn_ram_clean = QPushButton("Clean RAM")
+        self.btn_ram_clean.clicked.connect(self.handle_ram_cleanup)
+        
+        ram_layout.addWidget(ram_title)
+        ram_layout.addWidget(self.btn_ram_clean)
+        main_layout.addWidget(self.ram_card)
+
     def open_settings(self):
         dialog = SettingsDialog(self)
         dialog.exec()
+
+    def handle_ram_cleanup(self):
+        self.btn_ram_clean.setEnabled(False)
+        self.btn_ram_clean.setText("Optimizing......")
+
+        try:
+            freed_mb = self.monitor.clean_system_ram()
+            self.btn_ram_clean.setText(f"Success Freed {freed_mb:.1f} MB")
+        except Exception as e:
+            self.btn_ram_clean.setText("Optimization Failed")
+            print(f"Error executing RAM cleanup: {e}")
+        finally:
+            QTimer.singleShot(2500, lambda: self.btn_ram_clean.setText("Clean RAM"))
+            QTimer.singleShot(2500, lambda: self.btn_ram_clean.setEnabled(True))
 
     def update_dashboard(self):
         metrics = self.monitor.get_system_metrics()
         
         self.bat_value.setText(f"{metrics['battery_percent']}%")
-        self.bat_bar.setValue(metrics['battery_percent'])
+        self.bat_bar.setValue(int(metrics['battery_percent']))
         
         self.cpu_value.setText(f"{metrics['cpu_usage']}%")
         self.cpu_bar.setValue(int(metrics['cpu_usage']))

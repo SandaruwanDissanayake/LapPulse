@@ -2,6 +2,7 @@ import psutil
 import json
 import os
 import time
+import gc 
 
 class HardwareMonitor:
     def __init__(self):
@@ -71,3 +72,16 @@ class HardwareMonitor:
             json.dump(data, f)
             
         return should_notify
+    
+
+    def clean_system_ram(self) -> float:
+        """
+        Forces garbage collection and returns the approximate volume
+        of memory reclaimed in Megabyte (MB),
+        """
+        before_mem = psutil.virtual_memory().available
+        gc.collect()
+        after_mem = psutil.virtual_memory().available
+
+        bytes_freed=max(0, after_mem - before_mem)
+        return bytes_freed/(1024*1024)
