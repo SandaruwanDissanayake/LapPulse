@@ -2,7 +2,6 @@ import psutil
 import json
 import os
 import time
-import gc 
 
 class HardwareMonitor:
     def __init__(self):
@@ -73,15 +72,8 @@ class HardwareMonitor:
             
         return should_notify
     
-
+    
+    
     def clean_system_ram(self) -> float:
-        """
-        Forces garbage collection and returns the approximate volume
-        of memory reclaimed in Megabyte (MB),
-        """
-        before_mem = psutil.virtual_memory().available
-        gc.collect()
-        after_mem = psutil.virtual_memory().available
-
-        bytes_freed=max(0, after_mem - before_mem)
-        return bytes_freed/(1024*1024)
+        from lappulse.utils.memory_utils import execute_system_ram_cleanup
+        return execute_system_ram_cleanup()
