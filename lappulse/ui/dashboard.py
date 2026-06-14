@@ -196,7 +196,29 @@ class DashboardWindow(QMainWindow):
         cpu_layout.addWidget(self.cpu_bar)
         main_layout.addWidget(self.cpu_card)
 
-        #5 memory optimization card
+        #5 RAM Usage Card
+        self.ram_usage_card = QFrame()
+        self.ram_usage_card.setObjectName("Card")
+        ram_usage_layout = QVBoxLayout(self.ram_usage_card)
+
+        ram_usage_title = QLabel("RAM Usage")
+        ram_usage_title.setObjectName("CardTitle")
+
+        self.ram_value = QLabel("--%")
+        self.ram_value.setObjectName("CardValue")
+        self.ram_bar = QProgressBar()
+        self.ram_bar.setValue(0)
+        self.ram_details = QLabel("-- GB free")
+        self.ram_details.setObjectName("StatusActive")
+
+        ram_usage_layout.addWidget(ram_usage_title)
+        ram_usage_layout.addWidget(self.ram_value)
+        ram_usage_layout.addWidget(self.ram_bar)
+        ram_usage_layout.addWidget(self.ram_details)
+
+        main_layout.addWidget(self.ram_usage_card)
+
+        #6 memory optimization card
         self.ram_card = QFrame()
         self.ram_card.setObjectName("Card")
         ram_layout = QVBoxLayout(self.ram_card)
@@ -261,6 +283,8 @@ class DashboardWindow(QMainWindow):
 
         try:
             freed_mb = self.monitor.clean_system_ram()
+            self.update_dashboard()
+            QApplication.processEvents()
             self.btn_ram_clean.setText(f"Success Freed {freed_mb:.1f} MB")
         except Exception as e:
             self.btn_ram_clean.setText("Optimization Failed")
@@ -277,6 +301,14 @@ class DashboardWindow(QMainWindow):
 
         self.cpu_value.setText(f"{metrics['cpu_usage']}%")
         self.cpu_bar.setValue(int(metrics['cpu_usage']))
+
+        self.ram_value.setText(f"{metrics['ram_usage']}%")
+        self.ram_bar.setValue(int(metrics["ram_usage"]))
+
+        if "ram_available" in metrics:
+            self.ram_details.setText(
+                f"{metrics['ram_available']} GB free / {metrics['ram_total']} GB"
+            )
 
         if metrics['is_plugged']:
             self.char_value.setText("⚡ PLUGGED IN (Direct AC Power)")

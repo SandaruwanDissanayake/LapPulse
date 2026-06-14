@@ -39,13 +39,22 @@ class HardwareMonitor:
         is_plugged = battery.power_plugged if battery else False
         cpu_usage = psutil.cpu_percent(interval=None)
         
+        #new feature
+        memory = psutil.virtual_memory()
+        ram_usage = memory.percent
+        ram_total = round(memory.total / (1024**3), 1)
+        ram_available = round(memory.available / (1024**3), 1)
+
         should_notify = self.track_battery_maintenance(battery_pct, is_plugged)
         
         return {
             "battery_percent": battery_pct,
             "is_plugged": is_plugged,
             "cpu_usage": cpu_usage,
-            "trigger_discharge_alert": should_notify
+            "ram_usage": ram_usage,
+            "ram_total" : ram_total,
+            "ram_available" : ram_available,
+            "trigger_discharge_alert": should_notify, 
         }
 
     def track_battery_maintenance(self, percent, is_plugged):
